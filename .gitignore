@@ -1,0 +1,57 @@
+# Gradle
+.gradle
+build/
+gradlew
+gradlew.bat
+gradle/
+
+# Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+local.properties
+captures/
+.externalNativeBuild
+.cxx/
+*.apk
+*.aar
+
+# Build outputs
+bin/
+gen/
+out/
+*.log
+
+# IDE
+.vscode/
+.classpath
+.project
+.settings/
+.metadata/
+.c9/
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+/app/google-services.json
+/app/release/
+*.keystore
+*.jks
+
+# Testing
+.coverage
+coverage/
+
+# Node (if needed)
+node_modules/
+npm-debug.log
+package-lock.json

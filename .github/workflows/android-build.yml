@@ -1,0 +1,44 @@
+name: Build Symbolic Connection APK
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+
+    - name: Clean and build release APK
+      run: ./gradlew clean assembleRelease
+
+    - name: Upload APK artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: symbolic-connection-release.apk
+        path: app/build/outputs/apk/release/*.apk
+        retention-days: 30
+
+    - name: Upload build logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: app/build/logs/
+        retention-days: 7
