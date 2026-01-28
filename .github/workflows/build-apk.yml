@@ -24,15 +24,15 @@ jobs:
     - name: Make gradlew executable
       run: chmod +x ./gradlew
 
-    - name: Build release APK
-      run: ./gradlew clean assembleRelease -Dorg.gradle.jvmargs="-Xmx4g"
+    - name: Build debug APK
+      run: ./gradlew clean assembleDebug -Dorg.gradle.jvmargs="-Xmx4g"
 
     - name: Upload APK artifact
       if: success()
       uses: actions/upload-artifact@v4
       with:
-        name: Symbolic-Connection-Release.apk
-        path: app/build/outputs/apk/release/*.apk
+        name: Symbolic-Connection-Debug.apk
+        path: app/build/outputs/apk/debug/*.apk
         retention-days: 30
 
     - name: Upload build logs on failure
