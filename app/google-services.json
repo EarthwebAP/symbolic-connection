@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "84543643593",
+    "project_id": "glyph-007",
+    "storage_bucket": "glyph-007.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84543643593:android:adba4a9719a1aff8575218",
+        "android_client_info": {
+          "package_name": "com.glyphos.symbolic"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyXYdGxdzAFwoex2Nj8oH0lMsXzKRHlCQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
