@@ -71,19 +71,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Receivers for hardware interaction -->
-        <receiver
-            android:name=".hardware.BackTapReceiver"
-            android:enabled="true"
-            android:exported="false" />
-
-        <!-- Services for background operations -->
-        <service
-            android:name=".rituals.RitualService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="camera|microphone" />
-
     </application>
 
 </manifest>
