@@ -26,6 +26,7 @@ import com.glyphos.symbolic.ui.screens.security.EmergencySealScreen
 import com.glyphos.symbolic.ui.screens.security.GesturePatternScreen
 import com.glyphos.symbolic.ui.screens.interaction.RadialMenuScreen
 import com.glyphos.symbolic.ui.screens.batcave.BatcaveScreen
+import com.glyphos.symbolic.ui.screens.rooms.CallKeypadScreen
 
 /**
  * Main navigation graph for the app
@@ -51,7 +52,8 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier, is
         composable(Screen.SecurityBlurb.route) {
             SecurityBlurbScreen(
                 onBlurbComplete = {
-                    navController.navigate(if (isAuthenticated) Screen.Home.route else Screen.Login.route) {
+                    // Skip authentication for now, go directly to Home
+                    navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.SecurityBlurb.route) { inclusive = true }
                     }
                 }
@@ -109,6 +111,17 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier, is
         }
         composable(Screen.PresenceMap.route) {
             PresenceMapScreen(navController = navController)
+        }
+
+        // Dialer/Call screen
+        composable(Screen.Call.route, arguments = listOf(navArgument("callId") { type = NavType.StringType })) {
+            CallKeypadScreen(
+                onCall = { number ->
+                    // Handle phone call
+                    navController.popBackStack()
+                },
+                onClose = { navController.popBackStack() }
+            )
         }
     }
 }
