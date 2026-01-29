@@ -17,8 +17,10 @@ import com.glyphos.symbolic.interaction.DragDropManager
 import com.glyphos.symbolic.interaction.RadialMenuSystem
 import com.glyphos.symbolic.rituals.RitualOrchestrator
 import com.glyphos.symbolic.security.EmergencySeal
+import com.glyphos.symbolic.security.lens.BreathUnlock
 import com.glyphos.symbolic.security.lens.GesturePatternUnlock
 import com.glyphos.symbolic.presence.PresenceEngine
+import com.glyphos.symbolic.hardware.SoundRecognitionEngine
 import com.glyphos.symbolic.security.SovereignSecurityEngine
 import com.glyphos.symbolic.security.disguise.AppDisguiseManager
 import com.glyphos.symbolic.service.SymbolicConnectionService
@@ -211,9 +213,10 @@ object RitualModule {
     @Singleton
     @Provides
     fun provideRitualOrchestrator(
-        presenceEngine: PresenceEngine
+        breathUnlock: BreathUnlock,
+        soundEngine: SoundRecognitionEngine
     ): RitualOrchestrator {
-        return RitualOrchestrator(presenceEngine)
+        return RitualOrchestrator(breathUnlock, soundEngine)
     }
 }
 

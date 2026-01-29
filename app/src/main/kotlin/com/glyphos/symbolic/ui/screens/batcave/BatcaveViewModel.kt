@@ -12,4 +12,9 @@ import javax.inject.Inject
 @HiltViewModel
 class BatcaveViewModel @Inject constructor(
     val batcaveManager: BatcaveRoomManager
-) : ViewModel()
+) : ViewModel() {
+    // Expose properties from batcaveManager
+    val activeBatcave = batcaveManager.activeBatcave
+    val sealedMode = batcaveManager.sealedMode
+    val notificationsBlocked = batcaveManager.notificationsBlocked
+}

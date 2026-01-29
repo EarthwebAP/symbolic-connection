@@ -1,5 +1,6 @@
 package com.glyphos.symbolic.security.lens
 
+import kotlin.math.pow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -197,10 +198,6 @@ class GesturePatternUnlock @Inject constructor() {
             adjustedPossibilities > 100 -> "Years"
             else -> "Days"
         }
-    }
-
-    private fun Float.pow(exponent: Int): Float {
-        return kotlin.math.pow(this, exponent.toFloat())
     }
 
     data class PatternSecurity(

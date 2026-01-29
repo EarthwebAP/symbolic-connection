@@ -85,7 +85,7 @@ fun EmergencySealScreen(
                 text = sealReason,
                 color = Color(0xFF008B8B),
                 fontSize = 14.sp,
-                modifier = Modifier.androidx.compose.foundation.layout.padding(16.dp)
+                modifier = Modifier.padding(16.dp)
             )
 
             Spacer(modifier = Modifier.height(32.dp))

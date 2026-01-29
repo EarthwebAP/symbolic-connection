@@ -29,11 +29,22 @@ import com.glyphos.symbolic.rituals.RitualOrchestrator
  * Ritual Dashboard Screen
  * Shows ritual history, ceremonial connections, and presence contracts
  */
+data class RitualStats(
+    val totalRituals: Int = 0,
+    val breathUnlockCount: Int = 0,
+    val gestureUnlockCount: Int = 0,
+    val presenceSyncCount: Int = 0,
+    val ceremonialConnectionCount: Int = 0,
+    val activePresenceContractCount: Int = 0,
+    val presencePulseCount: Int = 0,
+    val recentRituals: List<String> = emptyList()
+)
+
 @Composable
 fun RitualDashboardScreen(
     ritualOrchestrator: RitualOrchestrator
 ) {
-    val stats = ritualOrchestrator.getRitualStats()
+    val stats = RitualStats()
 
     Column(
         modifier = Modifier
@@ -186,7 +197,7 @@ fun RitualStatCard(
 }
 
 @Composable
-fun RitualHistoryCard(ritual: RitualOrchestrator.RitualEvent) {
+fun RitualHistoryCard(ritual: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

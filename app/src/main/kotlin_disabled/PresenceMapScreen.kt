@@ -31,14 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.glyphos.symbolic.presence.PresenceEngine
+import com.glyphos.symbolic.ui.screens.presence.PresenceMapViewModel
 
 @Composable
 fun PresenceMapScreen(
     navController: NavController,
-    presenceEngine: PresenceEngine = hiltViewModel()
+    viewModel: PresenceMapViewModel = hiltViewModel()
 ) {
-    val userPresence by presenceEngine.userPresence.collectAsState()
+    val userPresence by viewModel.userPresence.collectAsState()
 
     Column(
         modifier = Modifier

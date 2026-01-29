@@ -189,7 +189,7 @@ fun GlyphVerificationScreen(
                     .padding(4.dp),
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
             ) {
-                featureVector.take(8).forEachIndexed { index, value ->
+                featureVector.take(8).forEachIndexed { index: Int, value: Float ->
                     Box(
                         modifier = Modifier
                             .size(30.dp)

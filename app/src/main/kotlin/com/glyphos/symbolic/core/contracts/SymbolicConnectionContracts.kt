@@ -537,7 +537,7 @@ data class AdaptiveLensProtection(
     val blurMode: BlurMode = BlurMode.AMBIENT,
     val proximityAware: Boolean = true,
     val breathDetectionEnabled: Boolean = true,
-    val unlockMethods: List<UnlockMethod> = listOf(UnlockMethod.BREATH),
+    val unlockMethods: List<UnlockMethod> = listOf(UnlockMethod.BREATH_ACTIVATION),
     val presenceBoundReveal: Boolean = true,
     val decoyInterface: Boolean = false
 ) : Serializable

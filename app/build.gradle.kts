@@ -87,6 +87,7 @@ dependencies {
     // ML Kit
     implementation("com.google.mlkit:face-detection:16.1.5")
     implementation("com.google.mlkit:pose-detection:18.0.0-beta3")
+    implementation("com.google.mlkit:text-recognition:16.0.0")
 
     // Security & Biometric
     implementation("androidx.security:security-crypto:1.1.0-alpha06")

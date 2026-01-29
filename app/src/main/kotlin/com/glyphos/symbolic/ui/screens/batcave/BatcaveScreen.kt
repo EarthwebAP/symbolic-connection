@@ -36,16 +36,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.glyphos.symbolic.spaces.BatcaveRoomManager
+import com.glyphos.symbolic.ui.screens.batcave.BatcaveViewModel
 
 @Composable
 fun BatcaveScreen(
     navController: NavController,
-    batcaveManager: BatcaveRoomManager = hiltViewModel()
+    viewModel: BatcaveViewModel = hiltViewModel()
 ) {
-    val activeBatcave by batcaveManager.activeBatcave.collectAsState()
-    val sealedMode by batcaveManager.sealedMode.collectAsState()
-    val notificationsBlocked by batcaveManager.notificationsBlocked.collectAsState()
+    val activeBatcave by viewModel.activeBatcave.collectAsState()
+    val sealedMode by viewModel.sealedMode.collectAsState()
+    val notificationsBlocked by viewModel.notificationsBlocked.collectAsState()
 
     val thoughtText = remember { mutableStateOf("") }
 

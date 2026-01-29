@@ -1,9 +1,12 @@
 package com.glyphos.symbolic.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -59,9 +62,9 @@ fun GlyphDisplay(
 
 @Composable
 fun GlyphRow(glyphs: List<String>) {
-    androidx.compose.foundation.layout.Row(
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
-        modifier = Modifier.androidx.compose.foundation.layout.fillMaxWidth()
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         glyphs.forEach { glyphId ->
             GlyphDisplay(glyphId = glyphId, size = 48f)

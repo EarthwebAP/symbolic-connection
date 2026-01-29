@@ -62,10 +62,10 @@ class VoiceRoutineEngine @Inject constructor(
                         val matches = it.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                         val scores = it.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES)
 
-                        if (!matches.isNullOrEmpty() && !scores.isNullOrEmpty()) {
+                        if (!matches.isNullOrEmpty() && !scores?.isEmpty()!!) {
                             val command = parseVoiceCommand(matches[0])
                             _recognizedCommand.value = command
-                            _confidence.value = scores[0]
+                            _confidence.value = scores!![0]
                         }
                     }
                     _isListening.value = false

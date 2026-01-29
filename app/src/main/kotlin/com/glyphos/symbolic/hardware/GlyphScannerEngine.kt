@@ -41,6 +41,16 @@ class GlyphScannerEngine @Inject constructor(
     private val _verificationResult = MutableStateFlow<VerificationResult?>(null)
     val verificationResult: StateFlow<VerificationResult?> = _verificationResult
 
+    // Stub properties for compilation
+    private val _isCameraActive = MutableStateFlow(false)
+    val isCameraActive: StateFlow<Boolean> = _isCameraActive
+
+    private val _currentFrame = MutableStateFlow<String?>(null)
+    val currentFrame: StateFlow<String?> = _currentFrame
+
+    private val _featureVector = MutableStateFlow(ByteArray(0))
+    val featureVector: StateFlow<ByteArray> = _featureVector
+
     private var camera: Camera? = null
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
@@ -87,10 +97,10 @@ class GlyphScannerEngine @Inject constructor(
         try {
             val image = com.google.mlkit.vision.common.InputImage.fromBitmap(bitmap, 0)
             textRecognizer.process(image)
-                .addOnSuccessListener { visionText ->
+                .addOnSuccessListener { visionText: com.google.mlkit.vision.text.Text ->
                     _extractedText.value = visionText.text
                 }
-                .addOnFailureListener { e ->
+                .addOnFailureListener { e: Exception ->
                     e.printStackTrace()
                 }
         } catch (e: Exception) {

@@ -1,5 +1,6 @@
 package com.glyphos.symbolic.data
 
+import com.glyphos.symbolic.core.contracts.Message
 import com.glyphos.symbolic.core.models.GlyphIdentity
 import java.io.Serializable
 

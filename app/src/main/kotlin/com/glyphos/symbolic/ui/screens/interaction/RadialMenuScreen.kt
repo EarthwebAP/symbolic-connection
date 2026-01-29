@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.glyphos.symbolic.interaction.RadialMenuViewModel
+import com.glyphos.symbolic.ui.screens.interaction.RadialMenuViewModel
 import kotlin.math.cos
 import kotlin.math.sin
 

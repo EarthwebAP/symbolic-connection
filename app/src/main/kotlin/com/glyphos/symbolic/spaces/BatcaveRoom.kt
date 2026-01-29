@@ -50,13 +50,6 @@ class BatcaveRoomManager @Inject constructor() {
                 aiAccessible = true,
                 screenshotAllowed = false,
                 copyAllowed = false
-            ),
-            presenceRequired = PresenceState(
-                cognitive = CognitiveMode.DEEP_FOCUS,
-                emotional = EmotionalTone.REFLECTIVE,
-                intent = IntentVector(openToSilence = true),
-                socialContext = SocialContext.ALONE,
-                bandwidth = BandwidthLevel.MAXIMUM
             )
         )
 
