@@ -197,7 +197,7 @@ private fun ChatSessionCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = session.lastMessage?.senderId?.first()?.uppercase() ?: "?",
+                    text = session.lastMessage?.senderId?.value?.firstOrNull()?.uppercase() ?: "?",
                     color = Color.Cyan,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold
@@ -229,10 +229,11 @@ private fun ChatSessionCard(
                 }
 
                 Text(
-                    text = session.lastMessage?.content ?: "No messages yet",
+                    text = "[Message]",
                     color = Color(0xFF008B8B),
                     fontSize = 12.sp,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 

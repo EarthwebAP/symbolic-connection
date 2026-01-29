@@ -14,7 +14,7 @@ import com.glyphos.symbolic.ui.navigation.BottomNavigationBar
 import com.glyphos.symbolic.ui.navigation.NavGraph
 import com.glyphos.symbolic.ui.navigation.Screen
 import com.glyphos.symbolic.ui.theme.Glyph007Theme
-// import dagger.hilt.android.AndroidEntryPoint  // Disabled: KAPT compilation issues
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Main entry point for Glyph007
@@ -22,7 +22,7 @@ import com.glyphos.symbolic.ui.theme.Glyph007Theme
  * PHASE 0: Grounding
  * Initial activity that sets up the Compose environment with navigation
  */
-// @AndroidEntryPoint  // Disabled: KAPT compilation issues
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

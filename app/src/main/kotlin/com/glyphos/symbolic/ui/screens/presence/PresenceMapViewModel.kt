@@ -1,6 +1,7 @@
 package com.glyphos.symbolic.ui.screens.presence
 
 import androidx.lifecycle.ViewModel
+import com.glyphos.symbolic.core.contracts.PresenceState
 import com.glyphos.symbolic.presence.PresenceEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -17,7 +18,6 @@ import kotlinx.coroutines.flow.asStateFlow
 class PresenceMapViewModel @Inject constructor(
     val presenceEngine: PresenceEngine
 ) : ViewModel() {
-    // Stub properties for compilation
-    private val _userPresence = MutableStateFlow<String?>(null)
-    val userPresence: StateFlow<String?> = _userPresence.asStateFlow()
+    private val _userPresence = MutableStateFlow<Map<String, PresenceState>>(emptyMap())
+    val userPresence: StateFlow<Map<String, PresenceState>> = _userPresence.asStateFlow()
 }

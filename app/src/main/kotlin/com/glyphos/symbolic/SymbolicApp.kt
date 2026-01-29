@@ -1,9 +1,10 @@
 package com.glyphos.symbolic
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
 /**
  * Application entry point
- * Note: @HiltAndroidApp disabled due to KAPT being disabled
  */
+@HiltAndroidApp
 class SymbolicApp : Application()

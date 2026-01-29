@@ -7,11 +7,25 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
+import com.glyphos.symbolic.ui.screens.auth.LoginScreen
+import com.glyphos.symbolic.ui.screens.auth.RegisterScreen
+import com.glyphos.symbolic.ui.screens.home.HomeScreen
+import com.glyphos.symbolic.ui.screens.glyph.GlyphScreen
+import com.glyphos.symbolic.ui.screens.glyph.GlyphVerificationScreen
+import com.glyphos.symbolic.ui.screens.rooms.RoomsListScreen
+import com.glyphos.symbolic.ui.screens.rooms.RoomDetailScreen
+import com.glyphos.symbolic.ui.screens.presence.PresenceScreen
+import com.glyphos.symbolic.ui.screens.presence.PresenceMapScreen
+import com.glyphos.symbolic.ui.screens.settings.SettingsScreen
 import com.glyphos.symbolic.ui.screens.splash.SplashScreen
 import com.glyphos.symbolic.ui.screens.splash.SecurityBlurbScreen
-// All other screens disabled due to Hilt dependency injection issues with KAPT disabled
+import com.glyphos.symbolic.ui.screens.chat.ChatScreen
+import com.glyphos.symbolic.ui.screens.contacts.ContactsScreen
+import com.glyphos.symbolic.ui.screens.rituals.RitualDashboardScreen
+import com.glyphos.symbolic.ui.screens.security.EmergencySealScreen
+import com.glyphos.symbolic.ui.screens.security.GesturePatternScreen
+import com.glyphos.symbolic.ui.screens.interaction.RadialMenuScreen
+import com.glyphos.symbolic.ui.screens.batcave.BatcaveScreen
 
 /**
  * Main navigation graph for the app
@@ -46,81 +60,55 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier, is
 
         // Auth screens
         composable(Screen.Login.route) {
-            // STUB: LoginScreen disabled for compilation
-            Text("Login Screen (Coming Soon)", color = Color.Cyan)
+            LoginScreen(
+                onLoginSuccess = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Login.route) { inclusive = true } } },
+                onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+            )
         }
-
         composable(Screen.Register.route) {
-            Text("Register (Coming Soon)", color = Color.Cyan)
+            RegisterScreen(
+                onRegisterSuccess = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Register.route) { inclusive = true } } },
+                onNavigateToLogin = { navController.navigate(Screen.Login.route) }
+            )
         }
 
         // Main app screens
         composable(Screen.Home.route) {
-            Text("Home (Coming Soon)", color = Color.Cyan)
+            HomeScreen(navController = navController)
         }
         composable(Screen.Glyph.route) {
-            Text("Glyph (Coming Soon)", color = Color.Cyan)
+            GlyphScreen(navController = navController)
         }
         composable(Screen.Rooms.route) {
-            Text("Rooms (Coming Soon)", color = Color.Cyan)
+            RoomsListScreen(navController = navController)
         }
         composable("room_detail/{roomId}") { backStackEntry ->
-            Text("Room Detail (Coming Soon)", color = Color.Cyan)
+            val roomId = backStackEntry.arguments?.getString("roomId") ?: ""
+            RoomDetailScreen(navController = navController, roomId = roomId)
         }
         composable(Screen.Presence.route) {
-            Text("Presence (Coming Soon)", color = Color.Cyan)
+            PresenceScreen(navController = navController)
         }
         composable(Screen.Settings.route) {
-            Text("Settings (Coming Soon)", color = Color.Cyan)
+            SettingsScreen(navController = navController)
         }
 
         // Symbolic Connection screens
         composable(Screen.Contacts.route) {
-            // STUB: ContactsScreen disabled for compilation
-            Text("Contacts (Coming Soon)", color = Color.Cyan)
+            ContactsScreen(navController = navController)
         }
-
-        composable(
-            Screen.Chat.route,
-            arguments = listOf(
-                navArgument("chatId") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            Text("Chat (Coming Soon)", color = Color.Cyan)
+        composable(Screen.Chat.route, arguments = listOf(navArgument("chatId") { type = NavType.StringType })) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+            ChatScreen(navController = navController, chatId = chatId)
         }
-
         composable(Screen.Batcave.route) {
-            // BatcaveScreen(navController)
+            BatcaveScreen(navController = navController)
         }
-
-        composable(Screen.SecureRoom.route) {
-            // SecureRoomScreen(navController)
-        }
-
-        composable(
-            Screen.Call.route,
-            arguments = listOf(
-                navArgument("callId") {
-                    type = NavType.StringType
-                }
-            )
-        ) { backStackEntry ->
-            val callId = backStackEntry.arguments?.getString("callId") ?: ""
-            // CallScreen(callId = callId, navController = navController)
-        }
-
-        composable(Screen.AddContact.route) {
-            // AddContactScreen(navController)
-        }
-
         composable(Screen.RadialMenu.route) {
-            // RadialMenuScreen(navController)
+            RadialMenuScreen(navController = navController)
         }
-
         composable(Screen.PresenceMap.route) {
-            // PresenceMapScreen(navController)
+            PresenceMapScreen(navController = navController)
         }
     }
 }
