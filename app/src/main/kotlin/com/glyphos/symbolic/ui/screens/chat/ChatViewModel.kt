@@ -3,7 +3,11 @@ package com.glyphos.symbolic.ui.screens.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.glyphos.symbolic.data.ChatSession
+import com.glyphos.symbolic.data.CipherCodec
+import com.glyphos.symbolic.data.CipherMessage
+import com.glyphos.symbolic.data.CipherMessageItem
 import com.glyphos.symbolic.data.ContactRepository
+import com.glyphos.symbolic.data.DeliveryStatus
 import com.glyphos.symbolic.data.MessageItem
 import com.glyphos.symbolic.data.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +24,12 @@ class ChatViewModel @Inject constructor(
 
     private val _messages = MutableStateFlow<List<MessageItem>>(emptyList())
     val messages: StateFlow<List<MessageItem>> = _messages
+
+    private val _cipherMessages = MutableStateFlow<List<CipherMessageItem>>(emptyList())
+    val cipherMessages: StateFlow<List<CipherMessageItem>> = _cipherMessages
+
+    private val _cipherStorage = MutableStateFlow<Map<String, CipherMessage>>(emptyMap())
+    val cipherStorage: StateFlow<Map<String, CipherMessage>> = _cipherStorage
 
     private val _newMessage = MutableStateFlow("")
     val newMessage: StateFlow<String> = _newMessage
@@ -90,6 +100,73 @@ class ChatViewModel @Inject constructor(
     fun setTypingIndicator(isTyping: Boolean) {
         viewModelScope.launch {
             // TODO: Broadcast typing indicator to recipient
+        }
+    }
+
+    fun sendCipherMessage(cipher: CipherMessage) {
+        viewModelScope.launch {
+            // Store cipher in local map
+            val storage = _cipherStorage.value.toMutableMap()
+            storage[cipher.messageId] = cipher
+            _cipherStorage.value = storage
+
+            // Create cipher message item for display
+            val item = CipherMessageItem(
+                messageId = cipher.messageId,
+                senderId = cipher.senderId,
+                senderName = "You",
+                timestamp = cipher.timestamp,
+                deliveryStatus = DeliveryStatus.SENT,
+                glyphPreviewId = cipher.glyphId,
+                isRevealed = false
+            )
+
+            // Add to cipher messages list
+            val currentCiphers = _cipherMessages.value.toMutableList()
+            currentCiphers.add(item)
+            _cipherMessages.value = currentCiphers
+        }
+    }
+
+    fun receiveCipherMessage(cipher: CipherMessage, senderName: String) {
+        viewModelScope.launch {
+            // Store cipher
+            val storage = _cipherStorage.value.toMutableMap()
+            storage[cipher.messageId] = cipher
+            _cipherStorage.value = storage
+
+            // Create cipher message item for display
+            val item = CipherMessageItem(
+                messageId = cipher.messageId,
+                senderId = cipher.senderId,
+                senderName = senderName,
+                timestamp = cipher.timestamp,
+                deliveryStatus = DeliveryStatus.DELIVERED,
+                glyphPreviewId = cipher.glyphId,
+                isRevealed = false
+            )
+
+            val currentCiphers = _cipherMessages.value.toMutableList()
+            currentCiphers.add(item)
+            _cipherMessages.value = currentCiphers
+        }
+    }
+
+    fun decryptCipher(cipherId: String): String? {
+        val cipher = _cipherStorage.value[cipherId] ?: return null
+        // Try to decrypt with timestamp as seed
+        return CipherCodec.decode(cipher.encryptedData, cipher.timestamp)
+    }
+
+    fun deleteCipher(cipherId: String) {
+        viewModelScope.launch {
+            val ciphers = _cipherMessages.value.toMutableList()
+            ciphers.removeAll { it.messageId == cipherId }
+            _cipherMessages.value = ciphers
+
+            val storage = _cipherStorage.value.toMutableMap()
+            storage.remove(cipherId)
+            _cipherStorage.value = storage
         }
     }
 }

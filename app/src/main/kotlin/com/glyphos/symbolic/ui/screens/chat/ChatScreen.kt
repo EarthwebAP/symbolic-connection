@@ -28,8 +28,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +42,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.glyphos.symbolic.data.MessageItem
+import com.glyphos.symbolic.ui.components.CipherMessageBubble
+import com.glyphos.symbolic.ui.components.EphemeralTextInput
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -56,6 +56,7 @@ fun ChatScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val messages by viewModel.messages.collectAsState()
+    val cipherMessages by viewModel.cipherMessages.collectAsState()
     val newMessage by viewModel.newMessage.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val typingUsers by viewModel.typingUsers.collectAsState()
@@ -108,6 +109,16 @@ fun ChatScreen(
             IconButton(onClick = { /* TODO: Initiate video call */ }) {
                 Icon(Icons.Filled.VideoCall, contentDescription = "Video Call", tint = Color.Cyan)
             }
+            // Cipher button
+            IconButton(onClick = {
+                navController.navigate("cipher_composer/$chatId/$contactName")
+            }) {
+                Text(
+                    text = "◆",
+                    color = Color.Cyan,
+                    fontSize = 18.sp
+                )
+            }
         }
 
         // Messages area
@@ -129,6 +140,16 @@ fun ChatScreen(
                 reverseLayout = true,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                items(cipherMessages.size) { index ->
+                    val cipherMsg = cipherMessages[index]
+                    CipherMessageBubble(
+                        cipherMessage = cipherMsg,
+                        isOwn = cipherMsg.senderId == "current-user-id",
+                        onDelete = { viewModel.deleteCipher(it) },
+                        decryptMessage = { viewModel.decryptCipher(it) ?: "Unable to decrypt" }
+                    )
+                }
+
                 items(messages) { message ->
                     MessageBubble(
                         message = message,
@@ -156,24 +177,18 @@ fun ChatScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                OutlinedTextField(
+                EphemeralTextInput(
                     value = newMessage,
                     onValueChange = {
                         viewModel.updateNewMessage(it)
-                        viewModel.setTypingIndicator(it.isNotEmpty())
                     },
-                    placeholder = { Text("Type message...", color = Color(0xFF008B8B)) },
+                    onTypingChange = { isTyping ->
+                        viewModel.setTypingIndicator(isTyping)
+                    },
+                    placeholder = "Type message...",
                     modifier = Modifier
                         .weight(1f)
-                        .height(40.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.Cyan,
-                        unfocusedTextColor = Color.Cyan,
-                        focusedBorderColor = Color.Cyan,
-                        unfocusedBorderColor = Color(0xFF008B8B),
-                        cursorColor = Color.Cyan
-                    ),
-                    singleLine = true
+                        .height(40.dp)
                 )
 
                 IconButton(
