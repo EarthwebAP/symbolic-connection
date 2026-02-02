@@ -38,6 +38,7 @@ import com.glyphos.symbolic.data.CipherMessageItem
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.absoluteValue
 
 @Composable
 fun CipherMessageBubble(
@@ -68,33 +69,44 @@ fun CipherMessageBubble(
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 if (!isRevealed) {
-                    // Encrypted view - show glyph and "Tap to reveal"
+                    // Glyph with red pulsing indicator
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(
-                            text = "🔐",
-                            fontSize = 28.sp
+                        // Generate glyph ID from message ID
+                        val glyphId = cipherMessage.messageId.substring(0, minOf(8, cipherMessage.messageId.length))
+
+                        GlyphWithMessageIndicator(
+                            glyphId = glyphId,
+                            label = cipherMessage.senderName.take(3),
+                            size = 80.dp,
+                            hasInvokedMessage = true
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
-                            text = "Secret Message",
+                            text = "Invoked message from ${cipherMessage.senderName}",
                             color = Color.Cyan,
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
                         Text(
-                            text = "from ${cipherMessage.senderName}",
+                            text = "Harmonic H${(cipherMessage.embeddingFrequency.toInt() / 440).coerceIn(1, 8)}",
                             color = Color(0xFF008B8B),
                             fontSize = 10.sp
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
                         Text(
-                            text = "Tap to reveal",
+                            text = "🔓 Tap to reveal",
                             color = Color.Cyan,
-                            fontSize = 11.sp,
+                            fontSize = 10.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -111,6 +123,14 @@ fun CipherMessageBubble(
                     Text(
                         text = "from ${cipherMessage.senderName}",
                         color = Color(0xFF008B8B),
+                        fontSize = 10.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "✓ Message invoked at H${(cipherMessage.embeddingFrequency.toInt() / 440).coerceIn(1, 8)}",
+                        color = Color.Cyan,
                         fontSize = 10.sp
                     )
                 }

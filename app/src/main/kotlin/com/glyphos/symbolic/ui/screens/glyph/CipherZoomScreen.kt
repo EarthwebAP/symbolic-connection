@@ -17,6 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,6 +58,12 @@ class PrimordialCipherZoomViewModel @Inject constructor(
     private val _embeddedMessage = MutableStateFlow<String?>(null)
     val embeddedMessage: StateFlow<String?> = _embeddedMessage
 
+    private val _invokingMessage = MutableStateFlow<String>("")
+    val invokingMessage: StateFlow<String> = _invokingMessage
+
+    private val _isInvokeMode = MutableStateFlow(false)
+    val isInvokeMode: StateFlow<Boolean> = _isInvokeMode
+
     private val _fieldStats = MutableStateFlow<PrimordialZoomEngine.FieldStats?>(null)
     val fieldStats: StateFlow<PrimordialZoomEngine.FieldStats?> = _fieldStats
 
@@ -77,7 +85,26 @@ class PrimordialCipherZoomViewModel @Inject constructor(
         _embeddedMessage.value = message
     }
 
+    fun startInvokeMode() {
+        _isInvokeMode.value = true
+        _invokingMessage.value = ""
+    }
+
+    fun updateInvokingMessage(text: String) {
+        _invokingMessage.value = text
+    }
+
+    fun invokeMessage(glyphId: String) {
+        val message = _invokingMessage.value
+        if (message.isNotEmpty()) {
+            _embeddedMessage.value = message
+            _isInvokeMode.value = false
+            _invokingMessage.value = ""
+        }
+    }
+
     fun getEmbeddingFrequency(): Double = _currentFrequency.value
+    fun getInvokedMessage(): String = _embeddedMessage.value ?: ""
 
     private fun updateStats(glyphId: String) {
         _fieldStats.value = primordialEngine.getGlyphFieldStats(glyphId)
@@ -98,6 +125,8 @@ fun PrimordialCipherZoomScreen(
     val zoomLevel by viewModel.zoomLevel.collectAsState()
     val embeddedMessage by viewModel.embeddedMessage.collectAsState()
     val fieldStats by viewModel.fieldStats.collectAsState()
+    val invokingMessage by viewModel.invokingMessage.collectAsState()
+    val isInvokeMode by viewModel.isInvokeMode.collectAsState()
 
     var selectedHarmonic by remember { mutableStateOf(1) }
 
@@ -230,6 +259,118 @@ fun PrimordialCipherZoomScreen(
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
+
+                // Invoke message mode
+                if (isInvokeMode) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .padding(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF1A1A1A)
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "💬 Type Message at H${selectedHarmonic}",
+                                color = Color.Cyan,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = invokingMessage,
+                                onValueChange = { viewModel.updateInvokingMessage(it) },
+                                placeholder = { Text("Enter message...", color = Color(0xFF008B8B)) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(100.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = Color.Cyan,
+                                    unfocusedTextColor = Color.Cyan,
+                                    focusedBorderColor = Color.Cyan,
+                                    unfocusedBorderColor = Color(0xFF008B8B),
+                                    cursorColor = Color.Cyan
+                                )
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Card(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable {
+                                            viewModel.updateInvokingMessage("")
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = Color(0xFF008B8B)
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "Cancel",
+                                        color = Color.Black,
+                                        fontSize = 11.sp,
+                                        modifier = Modifier.padding(8.dp),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+
+                                Card(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clickable {
+                                            if (invokingMessage.isNotEmpty()) {
+                                                viewModel.invokeMessage(glyphId)
+                                            }
+                                        },
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = if (invokingMessage.isNotEmpty()) Color.Cyan else Color(0xFF008B8B)
+                                    ),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "⚡ Invoke",
+                                        color = Color.Black,
+                                        fontSize = 11.sp,
+                                        modifier = Modifier.padding(8.dp),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                } else {
+                    // Button to enter invoke mode
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .clickable { viewModel.startInvokeMode() }
+                            .padding(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFF008B8B)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "💬 Enter Invoke Mode",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(12.dp),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
                 // Harmonic selector (1-8)
                 Card(

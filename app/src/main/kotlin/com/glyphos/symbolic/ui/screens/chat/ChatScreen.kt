@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import com.glyphos.symbolic.data.MessageItem
 import com.glyphos.symbolic.ui.components.CipherMessageBubble
 import com.glyphos.symbolic.ui.components.EphemeralTextInput
+import com.glyphos.symbolic.ui.components.GlyphWithMessageIndicator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
