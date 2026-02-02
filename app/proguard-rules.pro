@@ -21,6 +21,16 @@
 # Keep ML Kit
 -keep class com.google.mlkit.** { *; }
 
+# Keep WebRTC
+-keep class org.webrtc.** { *; }
+-dontwarn org.webrtc.**
+
+# Keep Socket.IO
+-keep class io.socket.** { *; }
+-keep class io.socket.client.** { *; }
+-dontwarn io.socket.**
+-dontwarn javax.xml.stream.**
+
 # Remove logging in release
 -assumenosideeffects class android.util.Log {
     public static *** d(...);

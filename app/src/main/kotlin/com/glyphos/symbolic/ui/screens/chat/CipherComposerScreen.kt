@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.glyphos.symbolic.data.CipherCodec
 import com.glyphos.symbolic.data.CipherMessage
 import com.glyphos.symbolic.ui.components.GlyphDisplay
+import com.glyphos.symbolic.ui.screens.glyph.PrimordialCipherZoomScreen
 
 /**
  * Cipher Composer Screen
@@ -57,9 +58,10 @@ fun CipherComposerScreen(
     onSendCipher: (CipherMessage) -> Unit
 ) {
     var messageText by remember { mutableStateOf("") }
-    var zoomDepth by remember { mutableFloatStateOf(50f) }
+    var embeddingFrequency by remember { mutableStateOf(440.0) }
     var isZoomMode by remember { mutableStateOf(false) }
     var glyphId by remember { mutableStateOf("glyph-cipher-${System.currentTimeMillis()}") }
+    var userId by remember { mutableStateOf("current-user-id") }
 
     Column(
         modifier = Modifier
@@ -98,18 +100,24 @@ fun CipherComposerScreen(
 
             IconButton(
                 onClick = {
-                    if (messageText.isNotEmpty()) {
+                    if (messageText.isNotEmpty() && embeddingFrequency > 0) {
                         val seed = CipherCodec.generateCipherSeed()
-                        val encrypted = CipherCodec.encode(messageText, seed)
+                        val encrypted = CipherCodec.encode(messageText, embeddingFrequency, seed)
+
+                        // Generate 3D field position from frequency
+                        val (x, y, z) = CipherCodec.generateFieldPosition(embeddingFrequency, 440.0)
+
                         val cipher = CipherMessage(
                             messageId = "cipher-${System.currentTimeMillis()}",
                             glyphId = glyphId,
                             senderId = "current-user-id",
                             recipientId = contactId,
                             plaintext = messageText,
-                            zoomDepth = zoomDepth,
-                            xCoordinate = (Math.random() * 1000),
-                            yCoordinate = (Math.random() * 1000),
+                            embeddingFrequency = embeddingFrequency,
+                            xCoordinate = x,
+                            yCoordinate = y,
+                            zCoordinate = z,
+                            baseFrequency = 440.0,
                             encryptedData = encrypted,
                             timestamp = System.currentTimeMillis()
                         )
@@ -250,56 +258,18 @@ fun CipherComposerScreen(
                 }
             }
         } else {
-            // Infinite zoom view placeholder
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF0A0A0A)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Infinite Zoom Mode",
-                        color = Color.Cyan,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Zoom to depth: ${zoomDepth.toInt()}%",
-                        color = Color(0xFF008B8B),
-                        fontSize = 12.sp
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Message will appear at this zoom level",
-                        color = Color.Cyan,
-                        fontSize = 12.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Exit zoom mode button
-                    Card(
-                        modifier = Modifier
-                            .clickable { isZoomMode = false }
-                            .padding(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.Cyan),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Exit Zoom Mode",
-                            color = Color.Black,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(12.dp),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+            // Primordial Zoom Mode
+            PrimordialCipherZoomScreen(
+                glyphId = glyphId,
+                userId = userId,
+                contactName = contactName,
+                messageToEmbed = messageText,
+                navController = navController,
+                onEmbeddingComplete = { frequency ->
+                    embeddingFrequency = frequency
+                    isZoomMode = false
                 }
-            }
+            )
         }
     }
 }

@@ -118,7 +118,8 @@ class ChatViewModel @Inject constructor(
                 timestamp = cipher.timestamp,
                 deliveryStatus = DeliveryStatus.SENT,
                 glyphPreviewId = cipher.glyphId,
-                isRevealed = false
+                isRevealed = false,
+                embeddingFrequency = cipher.embeddingFrequency
             )
 
             // Add to cipher messages list
@@ -143,7 +144,8 @@ class ChatViewModel @Inject constructor(
                 timestamp = cipher.timestamp,
                 deliveryStatus = DeliveryStatus.DELIVERED,
                 glyphPreviewId = cipher.glyphId,
-                isRevealed = false
+                isRevealed = false,
+                embeddingFrequency = cipher.embeddingFrequency
             )
 
             val currentCiphers = _cipherMessages.value.toMutableList()
@@ -154,8 +156,8 @@ class ChatViewModel @Inject constructor(
 
     fun decryptCipher(cipherId: String): String? {
         val cipher = _cipherStorage.value[cipherId] ?: return null
-        // Try to decrypt with timestamp as seed
-        return CipherCodec.decode(cipher.encryptedData, cipher.timestamp)
+        // Decrypt with harmonic frequency and timestamp as seed
+        return CipherCodec.decode(cipher.encryptedData, cipher.embeddingFrequency, cipher.timestamp)
     }
 
     fun deleteCipher(cipherId: String) {

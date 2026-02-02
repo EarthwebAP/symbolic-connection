@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,47 +35,75 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import com.glyphos.symbolic.identity.glyph.InfiniteZoomEngine
+import com.glyphos.symbolic.identity.glyph.PrimordialZoomEngine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class CipherZoomViewModel @Inject constructor(
-    private val zoomEngine: InfiniteZoomEngine
-) : androidx.lifecycle.ViewModel() {
-    private val _zoomLevel = MutableStateFlow(1f)
-    val zoomLevel: StateFlow<Float> = _zoomLevel
+class PrimordialCipherZoomViewModel @Inject constructor(
+    private val primordialEngine: PrimordialZoomEngine
+) : ViewModel() {
+    private val _currentFrequency = MutableStateFlow(440.0)
+    val currentFrequency: StateFlow<Double> = _currentFrequency
+
+    private val _zoomLevel = MutableStateFlow(1.0)
+    val zoomLevel: StateFlow<Double> = _zoomLevel
 
     private val _embeddedMessage = MutableStateFlow<String?>(null)
     val embeddedMessage: StateFlow<String?> = _embeddedMessage
 
-    fun updateZoom(glyphId: String, factor: Double) {
-        val newZoom = zoomEngine.zoom(glyphId, factor)
-        _zoomLevel.value = newZoom.toFloat()
+    private val _fieldStats = MutableStateFlow<PrimordialZoomEngine.FieldStats?>(null)
+    val fieldStats: StateFlow<PrimordialZoomEngine.FieldStats?> = _fieldStats
+
+    fun initializeGlyph(glyphId: String, userId: String) {
+        primordialEngine.initializeGlyphField(glyphId, userId, 440.0)
+        updateStats(glyphId)
+    }
+
+    fun zoomToHarmonic(glyphId: String, harmonicLevel: Int) {
+        val baseFrequency = 440.0
+        val targetFrequency = baseFrequency * harmonicLevel.coerceIn(1, 8)
+        val zoomRatio = primordialEngine.zoomToFrequency(glyphId, targetFrequency)
+        _currentFrequency.value = targetFrequency
+        _zoomLevel.value = zoomRatio
+        updateStats(glyphId)
     }
 
     fun embedMessage(glyphId: String, message: String) {
         _embeddedMessage.value = message
     }
 
-    fun getZoomLevel(): Float = _zoomLevel.value
+    fun getEmbeddingFrequency(): Double = _currentFrequency.value
+
+    private fun updateStats(glyphId: String) {
+        _fieldStats.value = primordialEngine.getGlyphFieldStats(glyphId)
+    }
 }
 
 @Composable
-fun CipherZoomScreen(
+fun PrimordialCipherZoomScreen(
     glyphId: String,
+    userId: String,
     contactName: String,
     messageToEmbed: String,
     navController: NavController,
-    viewModel: CipherZoomViewModel = hiltViewModel(),
-    onEmbeddingComplete: (Float) -> Unit
+    viewModel: PrimordialCipherZoomViewModel = hiltViewModel(),
+    onEmbeddingComplete: (Double) -> Unit
 ) {
+    val currentFrequency by viewModel.currentFrequency.collectAsState()
     val zoomLevel by viewModel.zoomLevel.collectAsState()
     val embeddedMessage by viewModel.embeddedMessage.collectAsState()
-    var showEmbedDialog by remember { mutableStateOf(true) }
+    val fieldStats by viewModel.fieldStats.collectAsState()
+
+    var selectedHarmonic by remember { mutableStateOf(1) }
+
+    LaunchedEffect(glyphId) {
+        viewModel.initializeGlyph(glyphId, userId)
+    }
 
     Column(
         modifier = Modifier
@@ -98,15 +127,15 @@ fun CipherZoomScreen(
                 }
                 Column {
                     Text(
-                        text = "Cipher Zoom",
+                        text = "Primordial Cipher Zoom",
                         color = Color.Cyan,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Zoom: ${(zoomLevel * 100).toInt()}%",
+                        text = "Harmonic ${selectedHarmonic} · ${currentFrequency.toInt()}Hz",
                         color = Color(0xFF008B8B),
-                        fontSize = 12.sp
+                        fontSize = 11.sp
                     )
                 }
             }
@@ -116,7 +145,6 @@ fun CipherZoomScreen(
                 IconButton(
                     onClick = {
                         viewModel.embedMessage(glyphId, messageToEmbed)
-                        showEmbedDialog = true
                     }
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = "Embed Message", tint = Color.Cyan)
@@ -124,7 +152,7 @@ fun CipherZoomScreen(
             }
         }
 
-        // Main zoom visualization
+        // Main harmonic field visualization
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,48 +164,66 @@ fun CipherZoomScreen(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Zoom indicator
+                // Harmonic field visualization
                 Box(
                     modifier = Modifier
-                        .size(120.dp)
+                        .size(160.dp)
                         .background(
-                            Color.Cyan.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(60.dp)
+                            Color.Cyan.copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(80.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "${(zoomLevel * 100).toInt()}%",
-                        color = Color.Cyan,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "⬡",
+                            fontSize = 48.sp,
+                            color = Color.Cyan
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "H${selectedHarmonic}",
+                            color = Color.Cyan,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "${currentFrequency.toInt()}Hz",
+                            color = Color(0xFF008B8B),
+                            fontSize = 12.sp
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Embedded message display at zoom level
-                if (embeddedMessage != null && zoomLevel >= 0.5f) {
+                // Embedded message display
+                if (embeddedMessage != null) {
                     Card(
                         modifier = Modifier
-                            .fillMaxWidth(0.8f)
+                            .fillMaxWidth(0.85f)
                             .padding(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = Color.Cyan.copy(alpha = 0.1f)
                         ),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.material3.CardDefaults.outlinedCardBorder()
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "📌 Message appears at this depth",
+                                text = "📌 Message embedded at harmonic H${selectedHarmonic}",
                                 color = Color.Cyan,
-                                fontSize = 12.sp
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = messageToEmbed,
                                 color = Color.Cyan,
-                                fontSize = 14.sp
+                                fontSize = 13.sp
                             )
                         }
                     }
@@ -185,75 +231,86 @@ fun CipherZoomScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Controls
-                Row(
+                // Harmonic selector (1-8)
+                Card(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(0.85f)
                         .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1A1A1A)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Card(
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.updateZoom(glyphId, 0.9)
-                            }
-                            .padding(8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Cyan.copy(alpha = 0.9f)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Zoom Out ÷",
-                            color = Color.Black,
+                            text = "Select Embedding Harmonic",
+                            color = Color.Cyan,
                             fontSize = 12.sp,
-                            modifier = Modifier.padding(12.dp),
                             fontWeight = FontWeight.Bold
                         )
-                    }
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                    Card(
-                        modifier = Modifier
-                            .clickable {
-                                viewModel.updateZoom(glyphId, 1.5)
-                            }
-                            .padding(8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Cyan.copy(alpha = 0.9f)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "Zoom In ×",
-                            color = Color.Black,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(12.dp),
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Card(
-                        modifier = Modifier
-                            .clickable {
-                                if (embeddedMessage != null) {
-                                    onEmbeddingComplete(zoomLevel)
-                                    navController.popBackStack()
+                        // Harmonic buttons
+                        repeat(2) { row ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                repeat(4) { col ->
+                                    val harmonic = row * 4 + col + 1
+                                    Card(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable {
+                                                selectedHarmonic = harmonic
+                                                viewModel.zoomToHarmonic(glyphId, harmonic)
+                                            },
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = if (selectedHarmonic == harmonic)
+                                                Color.Cyan else Color(0xFF008B8B)
+                                        ),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = "H$harmonic",
+                                            color = Color.Black,
+                                            fontSize = 10.sp,
+                                            modifier = Modifier.padding(8.dp),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
                             }
-                            .padding(8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFF008B8B)
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            text = "✓ Send",
-                            color = Color.Black,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(12.dp),
-                            fontWeight = FontWeight.Bold
-                        )
+                        }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Send button
+                Card(
+                    modifier = Modifier
+                        .clickable {
+                            if (embeddedMessage != null) {
+                                onEmbeddingComplete(currentFrequency)
+                                navController.popBackStack()
+                            }
+                        }
+                        .padding(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (embeddedMessage != null) Color.Cyan else Color(0xFF008B8B)
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "✓ Send Cipher",
+                        color = Color.Black,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(12.dp),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

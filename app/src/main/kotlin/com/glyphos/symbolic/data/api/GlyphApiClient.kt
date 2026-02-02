@@ -11,7 +11,7 @@ data class ApiResponse(
     val error: String?
 )
 
-class GlyphApiClient(private val baseUrl: String = "http://glyph.seodr.ovh:3000") {
+class GlyphApiClient(private val baseUrl: String = "https://glyph.seodr.ovh:3000") {
 
     suspend fun register(
         username: String,

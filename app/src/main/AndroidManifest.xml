@@ -47,6 +47,10 @@
     <!-- Telephony -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+    <!-- Foreground Services for WebRTC calls -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+
     <application
         android:name=".SymbolicApp"
         android:allowBackup="false"
@@ -70,6 +74,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Connection Status Service - Shows indicator in status bar -->
+        <service
+            android:name=".service.ConnectionStatusService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="false" />
+
+        <!-- Firebase Messaging Service -->
+        <service
+            android:name=".data.FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
     </application>
 

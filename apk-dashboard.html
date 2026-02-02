@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbolic Connection - APK & Web Analytics</title>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            color: #e0e0e0;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; font-size: 1.1em; }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #fff;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.3s;
+        }
+        
+        .download-btn:hover { transform: translateY(-2px); }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: #2a2f4a;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: #fff;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #1a1f3a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #667eea;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9em;
+            color: #667eea;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #fff;
+        }
+        
+        .stat-card .detail {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .section {
+            background: #1a1f3a;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #333;
+        }
+        
+        .section h2 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        #map {
+            width: 100%;
+            height: 500px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #667eea;
+        }
+        
+        .device-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .device-item {
+            background: #0a0e27;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .device-item .model {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .device-item .details {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .event-item {
+            background: #0a0e27;
+            padding: 10px;
+            margin: 8px 0;
+            border-left: 3px solid #51cf66;
+            font-size: 0.9em;
+        }
+        
+        .event-item.error {
+            border-left-color: #ff6b6b;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 Symbolic Connection</h1>
+        <p>Real APK & Web Analytics Dashboard - Live Telemetry</p>
+    </div>
+    
+    <div class="container">
+        <div class="download-section">
+            <h2 style="color: white; margin-bottom: 20px;">📱 Download APK</h2>
+            <button class="download-btn" onclick="downloadAPK()">
+                ⬇️ Download Symbolic Connection (167 MB)
+            </button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('apk')">📱 APK Telemetry</button>
+            <button class="tab-btn" onclick="switchTab('events')">📊 Events</button>
+            <button class="tab-btn" onclick="switchTab('devices')">🔧 Devices</button>
+        </div>
+        
+        <!-- APK Tab -->
+        <div id="apk" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>📱 Installed APKs</h3>
+                    <div class="value" id="totalAPKs">0</div>
+                    <div class="detail" id="activeAPKs">0 active</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📍 Devices</h3>
+                    <div class="value" id="uniqueDevices">0</div>
+                    <div class="detail">Unique models</div>
+                </div>
+                <div class="stat-card">
+                    <h3>🤖 Android Versions</h3>
+                    <div class="value" id="androidVersions">0</div>
+                    <div class="detail">Different versions</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📡 Total Connections</h3>
+                    <div class="value" id="totalConnections">0</div>
+                    <div class="detail">Across all APKs</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>🗺️ Installed APK Geolocation</h2>
+                <div id="map"></div>
+            </div>
+            
+            <div class="section">
+                <h2>📱 Installed Devices</h2>
+                <div class="device-list" id="deviceList">
+                    <div class="loading">Loading APK data...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Events Tab -->
+        <div id="events" class="tab-content">
+            <div class="section">
+                <h2>📊 Recent APK Telemetry Events</h2>
+                <div class="device-list" id="eventsList">
+                    <div class="loading">Loading events...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Devices Tab -->
+        <div id="devices" class="tab-content">
+            <div class="section">
+                <h2>🔧 Device Details & Features</h2>
+                <div class="device-list" id="deviceDetails">
+                    <div class="loading">Loading device details...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let map;
+        let markers = [];
+        const API_BASE_APK = 'http://localhost:9998';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            loadAPKData();
+            setInterval(loadAPKData, 5000);
+        });
+        
+        function initMap() {
+            map = L.map('map').setView([20, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap',
+                maxZoom: 19
+            }).addTo(map);
+        }
+        
+        async function loadAPKData() {
+            try {
+                const metricsResp = await fetch(`${API_BASE_APK}/api/apk/metrics`);
+                const metrics = await metricsResp.json();
+                
+                const installedResp = await fetch(`${API_BASE_APK}/api/apk/installed`);
+                const installed = await installedResp.json();
+                
+                const eventsResp = await fetch(`${API_BASE_APK}/api/apk/telemetry-log?limit=50`);
+                const events = await eventsResp.json();
+                
+                updateMetrics(metrics);
+                updateDeviceList(installed.apks);
+                updateMap(installed.apks);
+                updateEventsList(events.recentEvents);
+                updateDeviceDetails(installed.apks);
+            } catch (error) {
+                console.error('Failed to load APK data:', error);
+            }
+        }
+        
+        function updateMetrics(data) {
+            document.getElementById('totalAPKs').textContent = data.totalInstalledAPKs;
+            document.getElementById('activeAPKs').textContent = `${data.activeAPKs} active`;
+            document.getElementById('uniqueDevices').textContent = data.uniqueDevices;
+            document.getElementById('androidVersions').textContent = data.androidVersions;
+            document.getElementById('totalConnections').textContent = data.totalConnections;
+        }
+        
+        function updateDeviceList(devices) {
+            if (!devices || devices.length === 0) {
+                document.getElementById('deviceList').innerHTML = '<div class="loading">No APKs installed yet</div>';
+                return;
+            }
+            
+            let html = '';
+            devices.forEach(device => {
+                html += `
+                    <div class="device-item">
+                        <div class="model">📱 ${device.deviceBrand} ${device.deviceModel}</div>
+                        <div class="details">
+                            Android: ${device.androidVersion} | 
+                            Connections: ${device.connectionCount} | 
+                            Status: ${device.appStatus}
+                        </div>
+                        <div class="details">
+                            Device ID: ${device.deviceId.substring(0, 12)}... | 
+                            Active: ${new Date(device.lastActiveTime).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('deviceList').innerHTML = html;
+        }
+        
+        function updateMap(devices) {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            
+            devices?.forEach(device => {
+                if (device.lat !== 0 || device.lon !== 0) {
+                    const marker = L.circleMarker([device.lat, device.lon], {
+                        radius: 8,
+                        fillColor: '#51cf66',
+                        color: '#2f9e44',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.7
+                    }).bindPopup(`
+                        <strong>${device.deviceBrand} ${device.deviceModel}</strong><br>
+                        Android: ${device.androidVersion}<br>
+                        City: ${device.city}<br>
+                        Region: ${device.region}, ${device.country}<br>
+                        Status: ${device.appStatus}
+                    `).addTo(map);
+                    markers.push(marker);
+                }
+            });
+        }
+        
+        function updateEventsList(events) {
+            if (!events || events.length === 0) {
+                document.getElementById('eventsList').innerHTML = '<div class="loading">No events yet</div>';
+                return;
+            }
+            
+            let html = '';
+            events.forEach(event => {
+                const isError = event.eventType === 'error';
+                html += `
+                    <div class="event-item ${isError ? 'error' : ''}">
+                        <strong>${event.eventType}</strong> - ${event.deviceId.substring(0, 12)}...<br>
+                        ${new Date(event.timestamp).toLocaleString()}
+                    </div>
+                `;
+            });
+            
+            document.getElementById('eventsList').innerHTML = html;
+        }
+        
+        function updateDeviceDetails(devices) {
+            if (!devices || devices.length === 0) {
+                document.getElementById('deviceDetails').innerHTML = '<div class="loading">No devices</div>';
+                return;
+            }
+            
+            let html = '';
+            devices.forEach(device => {
+                const featuresList = device.features?.join(', ') || 'None';
+                const permsList = device.permissions?.join(', ') || 'None';
+                
+                html += `
+                    <div class="device-item">
+                        <div class="model">🔧 ${device.deviceBrand} ${device.deviceModel}</div>
+                        <div class="details">
+                            <strong>Device ID:</strong> ${device.deviceId}<br>
+                            <strong>App Version:</strong> ${device.appVersion}<br>
+                            <strong>Android:</strong> ${device.androidVersion}<br>
+                            <strong>Features:</strong> ${featuresList}<br>
+                            <strong>Permissions:</strong> ${permsList}<br>
+                            <strong>Installed:</strong> ${new Date(device.installTime).toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('deviceDetails').innerHTML = html;
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function downloadAPK() {
+            window.location.href = '/downloads/symbolic-connection.apk';
+        }
+    </script>
+</body>
+</html>
