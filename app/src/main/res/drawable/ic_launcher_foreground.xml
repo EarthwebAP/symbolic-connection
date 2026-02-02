@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer ring - silver chrome -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M 54,2 A 52,52 0 1,1 54,106 A 52,52 0 1,1 54,2 Z" />
+
+    <!-- Inner circle - dark background -->
+    <path
+        android:fillColor="#0A0A0A"
+        android:pathData="M 54,6 A 48,48 0 1,1 54,102 A 48,48 0 1,1 54,6 Z" />
+
+    <!-- GLyphIX Text - simplified geometric shapes -->
+    <!-- G -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M 28,40 L 28,65 L 42,65 L 42,58 L 35,58 L 35,40 Z" />
+
+    <!-- L -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M 48,40 L 48,65 L 62,65 L 62,58 L 55,58 L 55,40 Z" />
+
+    <!-- Y -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M 68,40 L 74,52 L 80,40 L 74,52 L 74,65 L 68,65 Z" />
+
+    <!-- Primordial Glyph - Harmonic rings using paths -->
+    <!-- Inner harmonic circle -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#00FFFF"
+        android:strokeWidth="1"
+        android:pathData="M 77,42 A 8,8 0 1,1 77,58 A 8,8 0 1,1 77,42 Z" />
+
+    <!-- Outer harmonic circle -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#C0C0C0"
+        android:strokeWidth="0.5"
+        android:pathData="M 77,38 A 12,12 0 1,1 77,62 A 12,12 0 1,1 77,38 Z" />
+
+    <!-- Pulsing red dot indicator -->
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M 88,35 A 3,3 0 1,1 88,41 A 3,3 0 1,1 88,35 Z" />
+
+    <!-- Cyan accent line -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#00FFFF"
+        android:strokeWidth="1"
+        android:pathData="M 40,75 L 70,75" />
+</vector>

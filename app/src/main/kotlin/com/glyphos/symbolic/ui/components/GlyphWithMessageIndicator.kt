@@ -57,7 +57,7 @@ fun GlyphWithMessageIndicator(
         GlyphDisplay(
             glyphId = glyphId,
             label = label,
-            size = size,
+            size = size.value,
             glowIntensity = if (hasInvokedMessage) 0.9f else 0.7f
         )
 
@@ -131,7 +131,7 @@ fun GlyphWithMessagePreview(
                 GlyphDisplay(
                     glyphId = glyphId,
                     label = label,
-                    size = size,
+                    size = size.value,
                     glowIntensity = if (hasInvokedMessage) 0.9f else 0.7f
                 )
 

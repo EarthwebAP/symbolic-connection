@@ -42,19 +42,34 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize telemetry client
-        telemetryClient = SymbolicConnectionClient(
-            context = this,
-            apiBaseUrl = "https://glyph.seodr.ovh:9998"
-        )
+        try {
+            // Initialize telemetry client
+            telemetryClient = SymbolicConnectionClient(
+                context = this,
+                apiBaseUrl = "https://glyph.seodr.ovh:9998"
+            )
 
-        // Start connection status indicator in status bar
-        connectionStatusManager.setConnected(false)
+            // Start connection status indicator in status bar (with error handling)
+            try {
+                connectionStatusManager.setConnected(false)
+            } catch (e: Exception) {
+                // Silently fail - telemetry is not critical
+                android.util.Log.e("MainActivity", "Connection status error", e)
+            }
 
-        // Register APK and log launch
-        scope.launch {
-            telemetryClient.registerAPK()
-            telemetryClient.logAppLaunch()
+            // Register APK and log launch (non-blocking)
+            scope.launch {
+                try {
+                    telemetryClient.registerAPK()
+                    telemetryClient.logAppLaunch()
+                } catch (e: Exception) {
+                    // Silently fail - telemetry is not critical
+                    android.util.Log.e("MainActivity", "Telemetry error", e)
+                }
+            }
+        } catch (e: Exception) {
+            // Log but continue - app should still load
+            android.util.Log.e("MainActivity", "Initialization error", e)
         }
 
         setContent {

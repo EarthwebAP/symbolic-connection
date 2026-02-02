@@ -47,6 +47,9 @@
     <!-- Telephony -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+    <!-- Contacts -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
     <!-- Foreground Services for WebRTC calls -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />

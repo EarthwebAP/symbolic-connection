@@ -62,6 +62,7 @@ fun CipherComposerScreen(
     var isZoomMode by remember { mutableStateOf(false) }
     var glyphId by remember { mutableStateOf("glyph-cipher-${System.currentTimeMillis()}") }
     var userId by remember { mutableStateOf("current-user-id") }
+    var zoomDepth by remember { mutableFloatStateOf(50f) }
 
     Column(
         modifier = Modifier
@@ -197,7 +198,7 @@ fun CipherComposerScreen(
                     GlyphDisplay(
                         glyphId = glyphId.substring(0, 8),
                         label = "Your Glyph",
-                        size = 96.dp,
+                        size = 96f,
                         glowIntensity = 0.8f
                     )
 

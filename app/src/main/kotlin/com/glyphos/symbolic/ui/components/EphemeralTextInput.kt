@@ -114,7 +114,7 @@ fun EphemeralTextInput(
             onValueChange = onValueChange,
             placeholder = { Text(placeholder, color = Color(0xFF008B8B)) },
             modifier = Modifier
-                .pointerInput(Unit, pass = PointerEventPass.Main) {
+                .pointerInput(Unit) {
                     detectTapGestures(
                         onLongPress = { offset ->
                             // Find word at tap position

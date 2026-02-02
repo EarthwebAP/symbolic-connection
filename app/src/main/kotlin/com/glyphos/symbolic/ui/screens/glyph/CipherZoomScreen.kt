@@ -76,7 +76,7 @@ class PrimordialCipherZoomViewModel @Inject constructor(
     val fieldStats: StateFlow<PrimordialZoomEngine.FieldStats?> = _fieldStats
 
     fun initializeGlyph(glyphId: String, userId: String) {
-        primordialEngine.initializeGlyphField(glyphId, userId, 440.0)
+        primordialEngine.initializeGlyphField(glyphId, com.glyphos.symbolic.core.contracts.UserId(userId), 440.0)
         updateStats(glyphId)
     }
 

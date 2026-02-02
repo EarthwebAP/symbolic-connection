@@ -1,5 +1,6 @@
 package com.glyphos.symbolic.ui.screens.contacts
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,9 +36,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -54,6 +62,12 @@ fun ContactsScreen(
     val chatSessions by viewModel.chatSessions.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val importError by viewModel.importError.collectAsState()
+    val importedCount by viewModel.importedCount.collectAsState()
+    val context = LocalContext.current
+
+    var showImportDialog by remember { mutableStateOf(false) }
+    var showImportSuccessDialog by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -78,6 +92,25 @@ fun ContactsScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
                 )
+
+                // Import Contacts Button
+                IconButton(
+                    onClick = { showImportDialog = true },
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .background(Color(0xFF004D4D), RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "📲",
+                            fontSize = 18.sp
+                        )
+                    }
+                }
+
                 IconButton(onClick = { /* TODO: Show menu */ }) {
                     Icon(
                         Icons.Filled.Search,
@@ -166,6 +199,120 @@ fun ContactsScreen(
         ) {
             Icon(Icons.Filled.Add, contentDescription = "New Chat", tint = Color.Black)
         }
+    }
+
+    // Import Confirmation Dialog
+    if (showImportDialog) {
+        AlertDialog(
+            onDismissRequest = { showImportDialog = false },
+            title = {
+                Text(
+                    "Import Phone Contacts",
+                    color = Color.Cyan,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "GLyphIX will read your phone contacts and add them to your contact list.",
+                        color = Color.Cyan
+                    )
+                    Text(
+                        "This requires the READ_CONTACTS permission.",
+                        color = Color(0xFF008B8B),
+                        fontSize = 12.sp
+                    )
+                    if (importError != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color(0xFF4D0000), RoundedCornerShape(4.dp))
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = importError ?: "",
+                                color = Color(0xFFFF6B6B),
+                                fontSize = 12.sp
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showImportDialog = false
+                        viewModel.importPhoneContacts(context)
+                        showImportSuccessDialog = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan)
+                ) {
+                    Text("Import", color = Color.Black, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showImportDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF004D4D))
+                ) {
+                    Text("Cancel", color = Color.Cyan)
+                }
+            },
+            containerColor = Color(0xFF1A1A1A),
+            textContentColor = Color.Cyan
+        )
+    }
+
+    // Import Success Dialog
+    if (showImportSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showImportSuccessDialog = false },
+            title = {
+                Text(
+                    if (importError != null) "Import Failed" else "Contacts Imported",
+                    color = if (importError != null) Color(0xFFFF6B6B) else Color(0xFF6BFF6B),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (importError != null) {
+                        Text(
+                            text = importError ?: "Unknown error occurred",
+                            color = Color(0xFFFF6B6B)
+                        )
+                    } else {
+                        Text(
+                            "Successfully imported $importedCount contact${if (importedCount != 1) "s" else ""}",
+                            color = Color.Cyan,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Your contacts are now available in the app.",
+                            color = Color(0xFF008B8B),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showImportSuccessDialog = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (importError != null) Color(0xFF4D0000) else Color.Cyan
+                    )
+                ) {
+                    Text(
+                        "OK",
+                        color = if (importError != null) Color(0xFFFF6B6B) else Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            containerColor = Color(0xFF1A1A1A),
+            textContentColor = Color.Cyan
+        )
     }
 }
 
