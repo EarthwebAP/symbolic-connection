@@ -113,6 +113,7 @@ fun CipherComposerScreen(
                             senderId = "current-user-id",
                             recipientId = contactId,
                             plaintext = messageText,
+                            contentType = com.glyphos.symbolic.data.InvokedContentType.TEXT,
                             embeddingFrequency = embeddingFrequency,
                             xCoordinate = x,
                             yCoordinate = y,

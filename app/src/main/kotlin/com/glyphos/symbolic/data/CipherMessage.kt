@@ -3,8 +3,19 @@ package com.glyphos.symbolic.data
 import java.io.Serializable
 
 /**
+ * Invoked Content Type
+ * Defines what type of content is invoked inside the glyph
+ */
+enum class InvokedContentType {
+    TEXT,
+    IMAGE,
+    VIDEO,
+    AUDIO
+}
+
+/**
  * Primordial Cipher Message
- * Message embedded in harmonic field at specific frequency and 3D coordinates
+ * Message/media embedded in harmonic field at specific frequency and 3D coordinates
  * Uses GlyphOS primordial coordinate system for infinite resolution
  */
 data class CipherMessage(
@@ -12,7 +23,12 @@ data class CipherMessage(
     val glyphId: String,
     val senderId: String,
     val recipientId: String,
-    val plaintext: String,
+    // Content
+    val plaintext: String,  // Text content (if type is TEXT)
+    val contentType: InvokedContentType = InvokedContentType.TEXT,
+    val mediaUrl: String? = null,  // URL/path for IMAGE, VIDEO, AUDIO
+    val mediaMimeType: String? = null,  // MIME type for media
+    val mediaThumbnail: String? = null,  // Base64 thumbnail for preview
     // Harmonic embedding coordinates
     val embeddingFrequency: Double,  // Harmonic frequency (440Hz - 20,000Hz range)
     val xCoordinate: Double,  // 3D field position X

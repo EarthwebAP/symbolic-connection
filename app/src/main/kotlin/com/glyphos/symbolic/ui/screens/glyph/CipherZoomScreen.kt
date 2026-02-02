@@ -64,6 +64,14 @@ class PrimordialCipherZoomViewModel @Inject constructor(
     private val _isInvokeMode = MutableStateFlow(false)
     val isInvokeMode: StateFlow<Boolean> = _isInvokeMode
 
+    private val _selectedMediaUri = MutableStateFlow<String?>(null)
+    val selectedMediaUri: StateFlow<String?> = _selectedMediaUri
+
+    private val _selectedMediaType = MutableStateFlow<com.glyphos.symbolic.data.InvokedContentType>(
+        com.glyphos.symbolic.data.InvokedContentType.TEXT
+    )
+    val selectedMediaType: StateFlow<com.glyphos.symbolic.data.InvokedContentType> = _selectedMediaType
+
     private val _fieldStats = MutableStateFlow<PrimordialZoomEngine.FieldStats?>(null)
     val fieldStats: StateFlow<PrimordialZoomEngine.FieldStats?> = _fieldStats
 
@@ -96,15 +104,27 @@ class PrimordialCipherZoomViewModel @Inject constructor(
 
     fun invokeMessage(glyphId: String) {
         val message = _invokingMessage.value
-        if (message.isNotEmpty()) {
+        if (message.isNotEmpty() || _selectedMediaUri.value != null) {
             _embeddedMessage.value = message
             _isInvokeMode.value = false
             _invokingMessage.value = ""
         }
     }
 
+    fun selectMedia(uri: String, mediaType: com.glyphos.symbolic.data.InvokedContentType) {
+        _selectedMediaUri.value = uri
+        _selectedMediaType.value = mediaType
+    }
+
+    fun clearMedia() {
+        _selectedMediaUri.value = null
+        _selectedMediaType.value = com.glyphos.symbolic.data.InvokedContentType.TEXT
+    }
+
     fun getEmbeddingFrequency(): Double = _currentFrequency.value
     fun getInvokedMessage(): String = _embeddedMessage.value ?: ""
+    fun getSelectedMediaUri(): String? = _selectedMediaUri.value
+    fun getSelectedMediaType(): com.glyphos.symbolic.data.InvokedContentType = _selectedMediaType.value
 
     private fun updateStats(glyphId: String) {
         _fieldStats.value = primordialEngine.getGlyphFieldStats(glyphId)
@@ -127,8 +147,11 @@ fun PrimordialCipherZoomScreen(
     val fieldStats by viewModel.fieldStats.collectAsState()
     val invokingMessage by viewModel.invokingMessage.collectAsState()
     val isInvokeMode by viewModel.isInvokeMode.collectAsState()
+    val selectedMediaUri by viewModel.selectedMediaUri.collectAsState()
+    val selectedMediaType by viewModel.selectedMediaType.collectAsState()
 
     var selectedHarmonic by remember { mutableStateOf(1) }
+    var invokeContentTab by remember { mutableStateOf(0) }  // 0=Text, 1=Image, 2=Video, 3=Audio
 
     LaunchedEffect(glyphId) {
         viewModel.initializeGlyph(glyphId, userId)
@@ -273,28 +296,104 @@ fun PrimordialCipherZoomScreen(
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "💬 Type Message at H${selectedHarmonic}",
+                                text = "⚡ Invoke Content at H${selectedHarmonic}",
                                 color = Color.Cyan,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                            OutlinedTextField(
-                                value = invokingMessage,
-                                onValueChange = { viewModel.updateInvokingMessage(it) },
-                                placeholder = { Text("Enter message...", color = Color(0xFF008B8B)) },
+                            // Content type tabs
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(100.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedTextColor = Color.Cyan,
-                                    unfocusedTextColor = Color.Cyan,
-                                    focusedBorderColor = Color.Cyan,
-                                    unfocusedBorderColor = Color(0xFF008B8B),
-                                    cursorColor = Color.Cyan
-                                )
-                            )
+                                    .padding(vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                val contentTypes = listOf("💬 Text", "📷 Image", "🎬 Video", "🔊 Audio")
+                                contentTypes.forEachIndexed { index, label ->
+                                    Card(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { invokeContentTab = index },
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = if (invokeContentTab == index) Color.Cyan else Color(0xFF008B8B)
+                                        ),
+                                        shape = RoundedCornerShape(6.dp)
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            color = Color.Black,
+                                            fontSize = 9.sp,
+                                            modifier = Modifier.padding(6.dp),
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // Content input based on tab
+                            when (invokeContentTab) {
+                                0 -> {
+                                    // Text mode
+                                    OutlinedTextField(
+                                        value = invokingMessage,
+                                        onValueChange = { viewModel.updateInvokingMessage(it) },
+                                        placeholder = { Text("Enter message...", color = Color(0xFF008B8B)) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(80.dp),
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            focusedTextColor = Color.Cyan,
+                                            unfocusedTextColor = Color.Cyan,
+                                            focusedBorderColor = Color.Cyan,
+                                            unfocusedBorderColor = Color(0xFF008B8B),
+                                            cursorColor = Color.Cyan
+                                        )
+                                    )
+                                }
+                                1, 2, 3 -> {
+                                    // Image, Video, Audio mode
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(80.dp)
+                                            .clickable { /* TODO: Open media picker */ },
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color(0xFF008B8B)
+                                        ),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            if (selectedMediaUri == null) {
+                                                Text(
+                                                    text = when (invokeContentTab) {
+                                                        1 -> "📷 Tap to select image"
+                                                        2 -> "🎬 Tap to select video"
+                                                        3 -> "🔊 Tap to select audio"
+                                                        else -> "Select media"
+                                                    },
+                                                    color = Color.Black,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            } else {
+                                                Text(
+                                                    text = "✓ Media selected",
+                                                    color = Color.Black,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
 
                             Spacer(modifier = Modifier.height(12.dp))
 
@@ -307,6 +406,7 @@ fun PrimordialCipherZoomScreen(
                                         .weight(1f)
                                         .clickable {
                                             viewModel.updateInvokingMessage("")
+                                            viewModel.clearMedia()
                                         },
                                     colors = CardDefaults.cardColors(
                                         containerColor = Color(0xFF008B8B)
@@ -314,7 +414,7 @@ fun PrimordialCipherZoomScreen(
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
-                                        text = "Cancel",
+                                        text = "✕ Cancel",
                                         color = Color.Black,
                                         fontSize = 11.sp,
                                         modifier = Modifier.padding(8.dp),
@@ -326,12 +426,13 @@ fun PrimordialCipherZoomScreen(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clickable {
-                                            if (invokingMessage.isNotEmpty()) {
+                                            val hasContent = invokingMessage.isNotEmpty() || selectedMediaUri != null
+                                            if (hasContent) {
                                                 viewModel.invokeMessage(glyphId)
                                             }
                                         },
                                     colors = CardDefaults.cardColors(
-                                        containerColor = if (invokingMessage.isNotEmpty()) Color.Cyan else Color(0xFF008B8B)
+                                        containerColor = if (invokingMessage.isNotEmpty() || selectedMediaUri != null) Color.Cyan else Color(0xFF008B8B)
                                     ),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
@@ -361,7 +462,7 @@ fun PrimordialCipherZoomScreen(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            text = "💬 Enter Invoke Mode",
+                            text = "⚡ Enter Invoke Mode",
                             color = Color.Black,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(12.dp),
